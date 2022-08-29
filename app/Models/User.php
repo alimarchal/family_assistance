@@ -39,6 +39,9 @@ class User extends Authenticatable
         'temporary_family_tie',
         'rtl',
         'status',
+        'gender',
+        'language',
+        'otp',
     ];
 
     /**

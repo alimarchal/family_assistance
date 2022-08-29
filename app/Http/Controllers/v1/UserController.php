@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendOtp;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
@@ -68,9 +70,13 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        $otp = mt_rand(1000, 9999);
+        $request->merge(['otp' => $otp]);
         $check_user = User::where('email', $request->email)->first();
         if (empty($check_user)) {
             $user = User::create($request->all());
+            Mail::to($user)->send(new SendOtp($user));
             return response([
                 'token' => $user->createToken($request->device_name)->plainTextToken,
                 'user' => $user,
@@ -123,23 +129,11 @@ class UserController extends Controller
 
     public function forgot_password(Request $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
-        if (!empty($user)) {
-            return response()->json(['error' => 'Record Not Found'], 404);
-        }
-        $password = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 9);
-        $user->update(['password' => Hash::make($password)]);
-        return response()->json(['success' => 'New password is sent to your registered email.']);
+        $request->validate(['email' => 'required|email']);
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+        return $status === Password::RESET_LINK_SENT ? response()->json(['status' => __($status)]) : response()->json(['email' => __($status)]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

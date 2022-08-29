@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('gender')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -32,6 +33,7 @@ return new class extends Migration
             $table->string('reference')->nullable();
             $table->string('temporary_family_tie')->nullable();
             $table->boolean('rtl')->default(0);
+            $table->boolean('language',30)->nullable();
             $table->integer('status')->default(0);
             $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v1\UserController;
+use App\Http\Controllers\v1\OtpApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,9 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::post('/user/{id}', [UserController::class, 'show']);
     Route::put('/user/{id}', [UserController::class, 'update']);
+
+    Route::post('/otp-generate', [OtpApiController::class, 'otpGenerate']);
+    Route::get('/otp/{id}', [OtpApiController::class, 'show']);
+    Route::get('/otp/{id}/latest', [OtpApiController::class, 'showLatest']);
+    Route::get('/otp/{showUserParentId}', [OtpApiController::class, 'showUserParentId']);
 });

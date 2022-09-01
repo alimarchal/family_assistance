@@ -33,7 +33,8 @@ class OtpApiController extends Controller
         $request->merge(['otp_code' => $otp]);
         $request->merge(['sending_mode' => $request->sending_mode]);
 
-        $user = User::find(auth()->user()->id);
+
+        $user = auth()->user();
         $user->otp = $otp;
         $user->save();
 

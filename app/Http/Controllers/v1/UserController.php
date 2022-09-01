@@ -26,7 +26,7 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user || Hash::check($request->password, $user->password)) {
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response([
                     'error' => ['The provided credentials are incorrect.'],

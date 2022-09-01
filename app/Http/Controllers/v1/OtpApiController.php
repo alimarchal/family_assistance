@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendOtp;
 use App\Models\Otp;
+use http\Client\Curl\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class OtpApiController extends Controller
@@ -30,7 +33,13 @@ class OtpApiController extends Controller
         $request->merge(['otp_code' => $otp]);
         $request->merge(['sending_mode' => $request->sending_mode]);
 
+        $user = User::find(auth()->user()->id);
+        $user->otp = $otp;
+        $user->save();
+
         $otp_generated = Otp::create($request->all());
+        Mail::to($user)->send(new SendOtp($user));
+
         return response(['otp' => $otp_generated], 200);
     }
 

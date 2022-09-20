@@ -34,8 +34,12 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/user/{id}', [UserController::class, 'show']);
     Route::put('/user/{id}', [UserController::class, 'update']);
 
+    Route::post('/delete_account_request', [UserController::class, 'delete_account_request']);
+    Route::post('/delete_account_request_verify_otp', [UserController::class, 'delete_account_request_verify_otp']);
+
     Route::post('/otp-generate', [OtpApiController::class, 'otpGenerate']);
     Route::get('/otp/{id}', [OtpApiController::class, 'show']);
     Route::get('/otp/{id}/latest', [OtpApiController::class, 'showLatest']);
     Route::get('/otp/{showUserParentId}', [OtpApiController::class, 'showUserParentId']);
+
 });

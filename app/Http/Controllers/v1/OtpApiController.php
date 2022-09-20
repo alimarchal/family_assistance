@@ -38,8 +38,16 @@ class OtpApiController extends Controller
         $user->otp = $otp;
         $user->save();
 
+        $subject = $request->subject;
+        $description = $request->description;
+
+
         $otp_generated = Otp::create($request->all());
-        Mail::to($user)->send(new SendOtp($user));
+        if (!empty($subject) && !empty($description)) {
+            Mail::to($user)->send(new SendOtp($user, $subject, $description));
+        } else {
+            Mail::to($user)->send(new SendOtp($user));
+        }
 
         return response(['otp' => $otp_generated], 200);
     }

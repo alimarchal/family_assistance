@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Mail\SendOtp;
+use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,17 +25,27 @@ class UserController extends Controller
             'device_name' => 'required',
         ]);
 
+
+        $check_account_status = User::where('email', $request->email)->first();
+        if (!empty($check_account_status)) {
+            // check if deleted
+            if ($check_account_status->account_deleted) {
+                return response(['message' => 'You account has been deleted.'], 200);
+            }
+        }
+
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user || Hash::check($request->password, $user->password)) {
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response([
                     'error' => ['The provided credentials are incorrect.'],
-                ], 404);
+                ], 403);
             } elseif ($user->status == 0) {
                 return response([
                     'status' => ['Your account is suspended'],
-                ], 45);
+                ], 403);
             }
         }
 
@@ -134,6 +145,78 @@ class UserController extends Controller
             $request->only('email')
         );
         return $status === Password::RESET_LINK_SENT ? response()->json(['status' => __($status)]) : response()->json(['email' => __($status)]);
+    }
+
+
+    public function delete_account_request(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'model_name' => ['required'],
+            'sending_mode' => ['required'],
+        ], [
+            'model_name.required' => 'Model name is required.',
+            'sending_mode.required' => 'Sending mode is required.',
+        ]);
+
+        $user = User::firstWhere('id', auth()->id());
+        if (!$user) {
+            return response()->json(['error' => 'Record Not Found'], 404);
+        }
+
+        $otp = mt_rand(1000, 9999);
+        $user = auth()->user();
+        $user->otp = $otp;
+        $user->save();
+
+        $subject = $request->subject;
+        $description = $request->description;
+
+        $otp_generated = Otp::create([
+            'user_id' => auth()->user()->id,
+            'user_parent_id' => $request->user_parent_id,
+            'model_name' => $request->model_name,
+            'otp_code' => $otp,
+            'sending_mode' => $request->sending_mode
+        ]);
+
+        if (!empty($subject) && !empty($description)) {
+            Mail::to($user)->send(new SendOtp($user, $subject, $description));
+        } else {
+            Mail::to($user)->send(new SendOtp($user));
+        }
+
+        return response()->json(['success' => 'OTP has been sent to your registered email.']);
+    }
+
+
+    public function delete_account_request_verify_otp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => ['required', 'string', 'max:255'],
+        ], [
+            'otp.required' => 'OTP is required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::findOrFail(auth()->user()->id);
+
+        if ($user->otp != $request->otp) {
+            return response([
+                'error' => ['Incorrect OTP entered.'],
+            ], 200);
+        }
+        $user->account_deleted = 1;
+        $user->save();
+        $otp_obj = Otp::where('user_id', auth()->user()->id)->latest()->first();
+        $otp_obj->status = 1;
+        $otp_obj->save();
+
+        return response([
+            'message' => 'You account has been deleted.'
+        ], 200);
     }
 
 }

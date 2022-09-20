@@ -43,6 +43,8 @@ class User extends Authenticatable
         'gender',
         'language',
         'otp',
+        'account_deleted',
+        'status',
     ];
 
     /**

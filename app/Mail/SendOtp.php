@@ -13,16 +13,24 @@ class SendOtp extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+    public $subject;
+    public $description;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $subject = null, $description = null)
     {
         $this->user = $user;
-        $this->subject('One Time Password (OTP)');
+        $this->subject = $subject;
+        $this->description = $description;
+        if (!empty($this->subject)) {
+            $this->subject($subject);
+        } else {
+            $this->subject('One Time Password (OTP)');
+        }
     }
 
     /**

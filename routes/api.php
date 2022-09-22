@@ -42,4 +42,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/otp/{id}/latest', [OtpApiController::class, 'showLatest']);
     Route::get('/otp/{showUserParentId}', [OtpApiController::class, 'showUserParentId']);
 
+
+    Route::resource('building', \App\Http\Controllers\v1\BuildingController::class);
+
 });

@@ -44,5 +44,6 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
 
     Route::resource('building', \App\Http\Controllers\v1\BuildingController::class);
+    Route::resource('location', \App\Http\Controllers\v1\LocationController::class);
 
 });

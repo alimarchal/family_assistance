@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('temporary_family_tie')->nullable();
             $table->boolean('rtl')->default(0);
             $table->boolean('language',30)->nullable();
+            $table->boolean('isMapAccess')->default(0);
             $table->integer('status')->default(0);
             $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();

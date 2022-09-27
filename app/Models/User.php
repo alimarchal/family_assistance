@@ -44,6 +44,7 @@ class User extends Authenticatable
         'language',
         'otp',
         'account_deleted',
+        'isMapAccess',
         'status',
     ];
 

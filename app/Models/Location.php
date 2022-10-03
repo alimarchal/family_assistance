@@ -14,4 +14,13 @@ class Location extends Model
         'family_head_id',
         'lat_long',
     ];
+
+
+    protected $appends = ['user'];
+
+    public function getUserAttribute()
+    {
+        return User::find($this->user_id);
+    }
+
 }

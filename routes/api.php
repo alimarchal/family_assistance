@@ -42,8 +42,11 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/otp/{id}/latest', [OtpApiController::class, 'showLatest']);
     Route::get('/otp/{showUserParentId}', [OtpApiController::class, 'showUserParentId']);
 
-
     Route::resource('building', \App\Http\Controllers\v1\BuildingController::class);
     Route::resource('location', \App\Http\Controllers\v1\LocationController::class);
 
+    Route::post('/delegateAccess', [\App\Http\Controllers\v1\DelegateAccessController::class, 'requestOTP']);
+    Route::post('/delegateAccess/verifyCode', [\App\Http\Controllers\v1\DelegateAccessController::class, 'delegateAccessVerifyCode']);
+
+    Route::resource('tempFamilyTie', \App\Http\Controllers\v1\TempFamilyTieController::class);
 });

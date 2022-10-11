@@ -17,4 +17,17 @@ class TempFamilyTie extends Model
         'tie_code',
         'untie_request',
     ];
+
+    protected $appends = ['user'];
+
+    public function getUserAttribute()
+    {
+        if ($this->my_id == auth()->user()->id) {
+            $head_id = $this->head_id;
+            return User::find($head_id);
+        } elseif ($this->head_id == auth()->user()->id) {
+            return User::find($this->my_id);
+        }
+    }
+
 }

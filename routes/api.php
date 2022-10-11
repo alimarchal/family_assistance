@@ -49,4 +49,6 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/delegateAccess/verifyCode', [\App\Http\Controllers\v1\DelegateAccessController::class, 'delegateAccessVerifyCode']);
 
     Route::resource('tempFamilyTie', \App\Http\Controllers\v1\TempFamilyTieController::class);
+    Route::post('/verifyTie', [\App\Http\Controllers\v1\TempFamilyTieController::class, 'verifyTie']);
+    Route::get('/myTie', [\App\Http\Controllers\v1\TempFamilyTieController::class, 'myTie']);
 });

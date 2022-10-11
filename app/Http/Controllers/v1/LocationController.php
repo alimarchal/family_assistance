@@ -16,20 +16,29 @@ class LocationController extends Controller
      */
     public function index(Request $request)
     {
-        if (auth()->user()->isMapAccess)
-        {
+        if (auth()->user()->isMapAccess) {
             if ($request->input('all')) {
                 $locations = Location::all();
                 return response()->json(['locations' => $locations], 200);
             }
             if ($request->input('family_head_id')) {
                 $locations = Location::where('family_head_id', $request->family_head_id)->get();
+                $get_user_id = $locations->pluck('user_id')->toArray();
+                $x = array_unique($get_user_id);
+                $unique_ids = [];
+                foreach ($x as $obj) {
+                    $unique_ids[] = $obj;
+                }
+
+
+                return $unique_ids;
+
                 return response()->json(['locations' => $locations], 200);
             } else {
                 $locations = Location::where('user_id', auth()->user()->id)->get();
                 return response()->json(['locations' => $locations], 200);
             }
-        } else{
+        } else {
             return response()->json(['message' => 'Permission_Denied'], 403);
         }
 

@@ -43,7 +43,11 @@ class TempFamilyTieController extends Controller
     public function store(Request $request)
     {
         $request->merge(['my_id' => auth()->user()->id]);
+        $random_code = mt_rand(1000, 9999);
+        $tie_code = auth()->user()->id . '_' . $random_code;
+        $request->merge(['tie_code' => $tie_code]);
         $temp_family_tie = TempFamilyTie::create($request->all());
+
         return response()->json(['temp_family_tie' => $temp_family_tie], 200);
     }
 
@@ -69,6 +73,31 @@ class TempFamilyTieController extends Controller
     {
         $tempFamilyTie->update($request->all());
         return response()->json(['tempFamilyTie' => $tempFamilyTie], 200);
+    }
+
+
+    public function verifyTie(Request $request)
+    {
+        $tie_code = $request->tie_code;
+        $temp_family_tie = TempFamilyTie::where('tie_code', $tie_code)->first();
+        $head_id = auth()->user()->id;
+        if (!empty($temp_family_tie) && $head_id != $temp_family_tie->my_id) {
+            $temp_family_tie->head_id = $head_id;
+            $temp_family_tie->tie_code = NULL;
+            $temp_family_tie->accepted = 1;
+            $temp_family_tie->save();
+            return response()->json(['message' => 'Tie successful'], 200);
+        } else {
+            return response()->json(['message' => 'Code not found'], 404);
+        }
+    }
+
+
+    public function myTie()
+    {
+        $token_id = auth()->user()->id;
+        $my_ties = TempFamilyTie::where('my_id', $token_id)->get();
+        return response()->json(['my_ties' => $my_ties], 200);
     }
 
     /**

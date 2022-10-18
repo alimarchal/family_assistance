@@ -51,4 +51,6 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::resource('tempFamilyTie', \App\Http\Controllers\v1\TempFamilyTieController::class);
     Route::post('/verifyTie', [\App\Http\Controllers\v1\TempFamilyTieController::class, 'verifyTie']);
     Route::get('/myTie', [\App\Http\Controllers\v1\TempFamilyTieController::class, 'myTie']);
+    Route::get('/showTie', [\App\Http\Controllers\v1\TempFamilyTieController::class, 'showTie']);
+    Route::post('/otpVerify', [\App\Http\Controllers\v1\UserController::class, 'otpVerify']);
 });

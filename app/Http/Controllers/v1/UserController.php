@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\SendOtp;
 use App\Models\Otp;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -86,8 +87,14 @@ class UserController extends Controller
         $request->merge(['otp' => $otp]);
         $check_user = User::where('email', $request->email)->first();
         if (empty($check_user)) {
-            $user = User::create($request->all());
-            Mail::to($user)->send(new SendOtp($user));
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'otp' => $request->otp,
+                'password' => Hash::make($request->password),
+            ]);
+            Mail::to($user)->send(new SendOtp($user, $request->subject, $request->description));
             return response([
                 'token' => $user->createToken($request->device_name)->plainTextToken,
                 'user' => $user,
@@ -97,6 +104,34 @@ class UserController extends Controller
                 'error' => 'Integrity constraint violation: 1062 Duplicate Email ID',
             ], 403);
         }
+    }
+
+
+    public function otpVerify(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => ['required', 'string', 'max:255'],
+        ], [
+            'otp.required' => 'OTP is required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::findOrFail(auth()->user()->id);
+
+        if ($user->otp != $request->otp) {
+            return response([
+                'error' => ['Incorrect OTP entered.'],
+            ], 200);
+        }
+        $user->email_verified_at = Carbon::now()->toDateTimeString();
+        $user->save();
+
+        return response([
+            'user' => 'verified'
+        ], 200);
     }
 
     public function show($id)

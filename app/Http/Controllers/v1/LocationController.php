@@ -5,7 +5,9 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Models\Building;
 use App\Models\Location;
+use App\Models\TempFamilyTie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LocationController extends Controller
 {
@@ -22,18 +24,24 @@ class LocationController extends Controller
                 return response()->json(['locations' => $locations], 200);
             }
             if ($request->input('family_head_id')) {
-                $locations = Location::where('family_head_id', $request->family_head_id)->get();
-                $get_user_id = $locations->pluck('user_id')->toArray();
-                $x = array_unique($get_user_id);
-                $unique_ids = [];
-                foreach ($x as $obj) {
-                    $unique_ids[] = $obj;
+
+                $family_tie = TempFamilyTie::where('my_id', auth()->user()->id)->where('accepted', 1)->whereNull('untie_request')->get();
+                $head_id = $family_tie->pluck('head_id');
+
+                $all_ids = [auth()->user()->id];
+                foreach ($head_id as $x) {
+                    $all_ids[] = $x;
+                }
+
+                $collection = collect();
+                foreach ($all_ids as $x) {
+                    $test_query = DB::select("SELECT * FROM locations INNER JOIN users ON locations.user_id = users.id WHERE locations.family_head_id = " . $x . " GROUP BY locations.user_id DESC;");
+                    $collection->push($test_query);
                 }
 
 
-                return $unique_ids;
+                return response()->json(['locations' => $collection], 200);
 
-                return response()->json(['locations' => $locations], 200);
             } else {
                 $locations = Location::where('user_id', auth()->user()->id)->get();
                 return response()->json(['locations' => $locations], 200);

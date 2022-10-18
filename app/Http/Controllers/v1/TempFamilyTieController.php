@@ -93,6 +93,16 @@ class TempFamilyTieController extends Controller
     }
 
 
+    public function showTie(Request $request)
+    {
+        $user_auth_id =  auth()->user()->id;
+        $family_tie = TempFamilyTie::where('my_id', $user_auth_id)->get();
+        $family_tie_1 = TempFamilyTie::where('head_id',$user_auth_id)->get();
+        $my_tire = ['my_ties' => $family_tie, 'other_tie' => $family_tie_1];
+        return response()->json(['family_tie' => $my_tire], 200);
+    }
+
+
     public function myTie()
     {
         $token_id = auth()->user()->id;

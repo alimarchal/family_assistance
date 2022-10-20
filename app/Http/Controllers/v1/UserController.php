@@ -38,11 +38,13 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || Hash::check($request->password, $user->password)) {
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response([
                     'error' => ['The provided credentials are incorrect.'],
-                ], 403);
+                ], 404);
             } elseif ($user->status == 0) {
                 return response([
                     'status' => ['Your account is suspended'],
@@ -93,6 +95,13 @@ class UserController extends Controller
                 'email' => $request->email,
                 'otp' => $request->otp,
                 'password' => Hash::make($request->password),
+                'gender' => $request->gender,
+                'country' => $request->country,
+                'city' => $request->city,
+                'mobile' => $request->mobile,
+                'role' => $request->role,
+                'mac_address' => $request->mac_address,
+                'device_name' => $request->device_name,
             ]);
             Mail::to($user)->send(new SendOtp($user, $request->subject, $request->description));
             return response([
